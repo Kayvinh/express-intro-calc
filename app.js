@@ -8,7 +8,8 @@ const { NotFoundError, BadRequestError } = require("./expressError");
 
 // Mean, median, mode functions
 const { findMean, findMedian, findMode } = require("./stats");
-const { convertStrNums } = require("./utils")
+const { convertStrNums, saveResponse } = require("./utils");
+const { stat } = require("fs");
 
 const MISSING = "Expected key `nums` with comma-separated list of numbers.";
 
@@ -73,6 +74,33 @@ app.get("/Mode", function (req, res) {
   });
 });
 
+
+app.get('/all', function (req, res) {
+
+  if(!req.query.nums) {
+    throw new BadRequestError(MISSING);
+  }
+
+  const numbers = convertStrNums(req.query.nums.split(","));
+
+  if (numbers[0] === "") {
+    throw new BadRequestError(MISSING);
+  }
+
+  const statsResponse = {
+    operation: "all",
+    mean: findMean(numbers),
+    median: findMedian(numbers),
+    mode: findMode(numbers)
+  }
+
+  if ( req.query.save ) {
+    saveResponse(statsResponse);
+  }
+
+  return res.json(statsResponse);
+
+})
 
 /** 404 handler: matches unmatched routes; raises NotFoundError. */
 app.use(function (req, res) {

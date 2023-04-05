@@ -1,4 +1,5 @@
 const { BadRequestError } = require("./expressError");
+const fsP = require('fs/promises');
 
 
 /** Convert strNums like ["1","2","3"] to [1, 2, 3]. */
@@ -18,5 +19,17 @@ function convertStrNums(strNums) {
 
 }
 
+async function saveResponse (statsResult) {
+  try {
+    await fsP.writeFile("./results.json", JSON.stringify(statsResult), "utf8");
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
+  console.log("Successfully wrote to file");
+}
 
-module.exports = { convertStrNums };
+
+module.exports = { 
+  convertStrNums,
+  saveResponse };
